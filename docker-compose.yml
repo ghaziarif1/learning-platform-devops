@@ -104,6 +104,24 @@ services:
       - learning_network
     restart: unless-stopped
 
+  course-service:
+    build:
+      context: ./services/course-service
+      dockerfile: Dockerfile
+    container_name: lp_course_service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/courses_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      USER_SERVICE_URL: http://user-service:8002
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - learning_network
+    restart: unless-stopped
+
 # ==================== VOLUMES ====================
 
 volumes:
