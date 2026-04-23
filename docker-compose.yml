@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   # ==================== BASES DE DONNÉES ====================
-  
+
   postgres:
     image: postgres:16-alpine
     container_name: lp_postgres
@@ -79,7 +79,33 @@ services:
       timeout: 20s
       retries: 3
 
+  # ==================== MICROSERVICES ====================
+
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: lp_user_service
+    environment:
+      PORT: 8002
+      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=admin
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: 7d
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      NODE_ENV: production
+    ports:
+      - "8002:8002"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - learning_network
+    restart: unless-stopped
+
 # ==================== VOLUMES ====================
+
 volumes:
   postgres_data:
   mongodb_data:
@@ -87,6 +113,7 @@ volumes:
   minio_data:
 
 # ==================== RÉSEAU ====================
+
 networks:
   learning_network:
     driver: bridge
