@@ -122,6 +122,24 @@ services:
       - learning_network
     restart: unless-stopped
 
+  analytics-service:
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    container_name: lp_analytics_service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/analytics_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      COURSE_SERVICE_URL: http://course-service:8001
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - learning_network
+    restart: unless-stopped
+
 # ==================== VOLUMES ====================
 
 volumes:
