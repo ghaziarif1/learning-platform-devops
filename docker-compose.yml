@@ -216,6 +216,25 @@ services:
       - learning_network
     restart: unless-stopped
 
+  # ==================== NGINX GATEWAY ====================
+
+  nginx-gateway:
+    build:
+      context: ./infrastructure/nginx
+      dockerfile: Dockerfile
+    container_name: lp_nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - user-service
+      - course-service
+      - analytics-service
+      - ai-tutor-service
+      - feedback-service
+    networks:
+      - learning_network
+    restart: unless-stopped
+
 # ==================== VOLUMES ====================
 
 volumes:
