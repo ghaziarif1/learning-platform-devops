@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ==================== BASES DE DONNÉES ====================
 
@@ -153,8 +151,6 @@ services:
       - learning_network
     restart: unless-stopped
 
-  # ==================== AI TUTOR (UPDATED) ====================
-
   ai-tutor-service:
     build:
       context: ./services/ai-tutor-service
@@ -175,6 +171,51 @@ services:
       - learning_network
     restart: unless-stopped
 
+  # ==================== N8N ====================
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: lp_n8n
+    environment:
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD}
+      N8N_HOST: n8n
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: http://n8n:5678/
+      GENERIC_TIMEZONE: Africa/Tunis
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - learning_network
+    restart: unless-stopped
+
+  # ==================== FEEDBACK SERVICE ====================
+
+  feedback-service:
+    build:
+      context: ./services/n8n-automation/feedback-api
+      dockerfile: Dockerfile
+    container_name: lp_feedback_service
+    environment:
+      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=admin
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/feedback
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: tinyllama
+    ports:
+      - "8005:8005"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      n8n:
+        condition: service_started
+    networks:
+      - learning_network
+    restart: unless-stopped
+
 # ==================== VOLUMES ====================
 
 volumes:
@@ -183,6 +224,7 @@ volumes:
   redis_data:
   minio_data:
   ollama_data:
+  n8n_data:
 
 # ==================== NETWORK ====================
 

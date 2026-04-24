@@ -1,0 +1,63 @@
+{
+  "name": "Feedback Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "feedback",
+        "responseMode": "onReceived",
+        "responseData": "allEntries"
+      },
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json[\"body\"][\"rating\"]}}",
+              "operation": "smallerEqual",
+              "value2": 2
+            }
+          ]
+        }
+      },
+      "name": "Low Rating Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const data = items[0].json.body || items[0].json;\nreturn [{\n  json: {\n    alert: true,\n    message: `⚠️ Low rating alert! Course: ${data.course_title}, Rating: ${data.rating}/5`,\n    feedback_id: data.feedback_id,\n    ai_summary: data.ai_summary\n  }\n}];"
+      },
+      "name": "Format Alert",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "functionCode": "const data = items[0].json.body || items[0].json;\nreturn [{\n  json: {\n    logged: true,\n    feedback_id: data.feedback_id,\n    course_title: data.course_title,\n    rating: data.rating,\n    ai_summary: data.ai_summary,\n    processed_at: new Date().toISOString()\n  }\n}];"
+      },
+      "name": "Log Feedback",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [680, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{"node": "Low Rating Check", "type": "main", "index": 0}]]
+    },
+    "Low Rating Check": {
+      "main": [
+        [{"node": "Format Alert", "type": "main", "index": 0}],
+        [{"node": "Log Feedback", "type": "main", "index": 0}]
+      ]
+    }
+  }
+}
