@@ -57,7 +57,7 @@ export default function CourseDetailPage() {
           <p className="text-slate-300 max-w-2xl mb-6">{course.description}</p>
           <div className="flex items-center gap-4">
             <span className="text-2xl font-bold text-green-400">
-              {course.is_free ? "Free" : `$${course.price}`}
+              {course.is_free ? "Gratuit" : `${course.price} DT`}
             </span>
             {enrolled ? (
               <div className="flex items-center gap-2 text-green-400">
@@ -65,7 +65,7 @@ export default function CourseDetailPage() {
               </div>
             ) : (
               <Button onClick={enroll} className="bg-green-500 hover:bg-green-600">
-                {course.is_free ? "Enroll Free" : `Enroll — $${course.price}`}
+                {course.is_free ? "S'inscrire Gratuitement" : `S'inscrire — ${course.price} DT`}
               </Button>
             )}
           </div>

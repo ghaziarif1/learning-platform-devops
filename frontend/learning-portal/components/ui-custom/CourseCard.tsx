@@ -42,7 +42,7 @@ export default function CourseCard({ course }: { course: Course }) {
 
       <CardFooter className="flex items-center justify-between pt-0">
         <span className="font-semibold text-blue-600">
-          {course.is_free ? "Free" : `$${course.price}`}
+          {course.is_free ? "Gratuit" : `${course.price} DT`}
         </span>
         <Link href={`/courses/${course.id}`}>
           <Button size="sm">View Course</Button>
