@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   # ==================== BASES DE DONNÉES ====================
 
@@ -171,6 +173,29 @@ services:
       - learning_network
     restart: unless-stopped
 
+  # ==================== FEEDBACK SERVICE ====================
+
+  feedback-service:
+    build:
+      context: ./services/n8n-automation/feedback-api
+      dockerfile: Dockerfile
+    container_name: lp_feedback_service
+    environment:
+      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=admin
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/feedback
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: tinyllama
+    ports:
+      - "8005:8005"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      n8n:
+        condition: service_started
+    networks:
+      - learning_network
+    restart: unless-stopped
+
   # ==================== N8N ====================
 
   n8n:
@@ -193,25 +218,19 @@ services:
       - learning_network
     restart: unless-stopped
 
-  # ==================== FEEDBACK SERVICE ====================
+  # ==================== FRONTEND ====================
 
-  feedback-service:
+  learning-portal:
     build:
-      context: ./services/n8n-automation/feedback-api
+      context: ./frontend/learning-portal
       dockerfile: Dockerfile
-    container_name: lp_feedback_service
+    container_name: lp_frontend
     environment:
-      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_DB}?authSource=admin
-      N8N_WEBHOOK_URL: http://n8n:5678/webhook/feedback
-      OLLAMA_URL: http://ollama:11434
-      OLLAMA_MODEL: tinyllama
+      NEXT_PUBLIC_API_URL: http://localhost
     ports:
-      - "8005:8005"
+      - "3000:3000"
     depends_on:
-      mongodb:
-        condition: service_healthy
-      n8n:
-        condition: service_started
+      - nginx-gateway
     networks:
       - learning_network
     restart: unless-stopped
