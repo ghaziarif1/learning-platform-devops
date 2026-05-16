@@ -13,6 +13,13 @@ class LessonBase(BaseModel):
 class LessonCreate(LessonBase):
     pass
 
+class LessonUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    video_url: Optional[str] = None
+    duration_minutes: Optional[int] = None
+    order_index: Optional[int] = None
+
 class LessonOut(LessonBase):
     id: int
     course_id: int
@@ -59,5 +66,7 @@ class EnrollmentOut(BaseModel):
     course_id: int
     enrolled_at: datetime
     progress: Decimal
+    completed_at: Optional[datetime] = None
+    course: Optional[CourseOut] = None
     class Config:
         from_attributes = True

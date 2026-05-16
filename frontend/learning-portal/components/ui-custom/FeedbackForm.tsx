@@ -30,7 +30,7 @@ export default function FeedbackForm({ courseId, courseTitle }: {
       });
       setSubmitted(true);
     } catch {
-      alert("Error submitting feedback.");
+      alert("Impossible d'envoyer votre avis.");
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ export default function FeedbackForm({ courseId, courseTitle }: {
   if (submitted) return (
     <Card>
       <CardContent className="pt-6 text-center text-green-600 font-medium">
-        ✅ Thank you for your feedback!
+        ✅ Merci pour votre feedback !
       </CardContent>
     </Card>
   );
@@ -47,7 +47,7 @@ export default function FeedbackForm({ courseId, courseTitle }: {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Rate this course</CardTitle>
+        <CardTitle className="text-base">Donner votre avis</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-1">
@@ -66,13 +66,13 @@ export default function FeedbackForm({ courseId, courseTitle }: {
           ))}
         </div>
         <Textarea
-          placeholder="Share your thoughts (optional)..."
+          placeholder="Partagez votre avis (facultatif)..."
           value={comment}
           onChange={e => setComment(e.target.value)}
           rows={3}
         />
         <Button onClick={submit} disabled={!rating || loading} className="w-full">
-          {loading ? "Submitting..." : "Submit Feedback"}
+          {loading ? "Envoi en cours..." : "Envoyer le feedback"}
         </Button>
       </CardContent>
     </Card>

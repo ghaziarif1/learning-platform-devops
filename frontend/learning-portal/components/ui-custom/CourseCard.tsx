@@ -2,10 +2,18 @@ import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock } from "lucide-react";
+import { BookOpen, Clock, Pencil } from "lucide-react";
 import { Course } from "@/lib/api";
 
-export default function CourseCard({ course }: { course: Course }) {
+export default function CourseCard({
+  course,
+  editHref,
+  isOwner,
+}: {
+  course: Course;
+  editHref?: string;
+  isOwner?: boolean;
+}) {
   const levelColor: Record<string, string> = {
     beginner: "bg-green-100 text-green-700",
     intermediate: "bg-yellow-100 text-yellow-700",
@@ -14,6 +22,12 @@ export default function CourseCard({ course }: { course: Course }) {
 
   return (
     <Card className="hover:shadow-lg transition-shadow duration-200 flex flex-col">
+      {course.thumbnail_url ? (
+        <div className="overflow-hidden rounded-t-xl">
+          <img src={course.thumbnail_url} alt={course.title} className="h-44 w-full object-cover" />
+        </div>
+      ) : null}
+
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-lg leading-tight">{course.title}</CardTitle>
@@ -40,13 +54,24 @@ export default function CourseCard({ course }: { course: Course }) {
         </div>
       </CardContent>
 
-      <CardFooter className="flex items-center justify-between pt-0">
+      <CardFooter className="flex flex-wrap items-center justify-between gap-3 pt-0">
         <span className="font-semibold text-blue-600">
           {course.is_free ? "Gratuit" : `${course.price} DT`}
         </span>
-        <Link href={`/courses/${course.id}`}>
-          <Button size="sm">View Course</Button>
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {editHref ? (
+            <Link href={editHref}>
+              <Button size="sm" variant="outline" className="flex items-center gap-2">
+                <Pencil className="h-4 w-4" /> Edit
+              </Button>
+            </Link>
+          ) : null}
+          <Link href={`/courses/${course.id}`}>
+            <Button size="sm">
+              {isOwner ? "Gérer les leçons" : "Voir le cours"}
+            </Button>
+          </Link>
+        </div>
       </CardFooter>
     </Card>
   );

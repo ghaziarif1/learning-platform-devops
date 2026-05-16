@@ -98,10 +98,12 @@ docker exec lp_ollama ollama pull tinyllama
 
 ### 5. Importer le workflow n8n
 
+Le workflow `services/n8n-automation/workflows/feedback_workflow.json` est désormais importé automatiquement à la première exécution de n8n.
+
 1. Ouvre http://localhost:5678
 2. Login : `admin` / `admin123`
-3. Import → `services/n8n-automation/workflows/feedback_workflow.json`
-4. Activer le workflow
+3. Vérifie que le workflow `Feedback Workflow` est présent
+4. Active le workflow si nécessaire
 
 ### 6. Ouvrir l'application
 

@@ -35,6 +35,18 @@ export interface Lesson {
   content: string;
   duration_minutes: number;
   order_index: number;
+  video_url?: string;
+}
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correct_answer: number;
+  explanation: string;
+}
+
+export interface QuizResponse {
+  questions: QuizQuestion[];
 }
 
 export interface User {
@@ -43,6 +55,16 @@ export interface User {
   firstName: string;
   lastName: string;
   role: string;
+}
+
+export interface Enrollment {
+  id: number;
+  user_id: string;
+  course_id: number;
+  enrolled_at: string;
+  progress: number;
+  completed_at?: string;
+  course?: Course;
 }
 
 export interface DashboardStats {
@@ -55,7 +77,7 @@ export interface DashboardStats {
 
 // Auth
 export const authAPI = {
-  register: (data: { email: string; password: string; firstName: string; lastName: string }) =>
+  register: (data: { email: string; password: string; firstName: string; lastName: string; role: "student" | "instructor" | "admin" }) =>
     api.post("/api/auth/register", data),
   login: (data: { email: string; password: string }) =>
     api.post("/api/auth/login", data),
@@ -68,10 +90,40 @@ export const coursesAPI = {
     api.get<Course[]>("/api/courses/", { params }),
   getById: (id: number) => api.get<Course>(`/api/courses/${id}`),
   create: (data: Partial<Course>) => api.post<Course>("/api/courses/", data),
+  update: (courseId: number, data: Partial<Course>) => api.put<Course>(`/api/courses/${courseId}`, data),
+  delete: (courseId: number) => api.delete(`/api/courses/${courseId}`),
   enroll: (userId: string, courseId: number) =>
     api.post("/api/enrollments/", { user_id: userId, course_id: courseId }),
   getUserEnrollments: (userId: string) =>
-    api.get(`/api/enrollments/user/${userId}`),
+    api.get<Enrollment[]>(`/api/enrollments/user/${userId}`),
+  updateEnrollmentProgress: (enrollmentId: number, progress: number) =>
+    api.patch<Enrollment>(`/api/enrollments/${enrollmentId}/progress`, { progress }),
+  getInstructorCourses: (instructorId: string) =>
+    api.get<Course[]>(`/api/courses/instructor/${instructorId}`),
+  getLessons: (courseId: number) =>
+    api.get<Lesson[]>(`/api/courses/${courseId}/lessons/`),
+  addLesson: (courseId: number, data: {
+    title: string;
+    content?: string;
+    video_url?: string;
+    duration_minutes: number;
+    order_index: number;
+  }) => api.post<Lesson>(`/api/courses/${courseId}/lessons/`, data),
+  updateLesson: (courseId: number, lessonId: number, data: {
+    title?: string;
+    content?: string;
+    video_url?: string;
+    duration_minutes?: number;
+    order_index?: number;
+  }) => api.put<Lesson>(`/api/courses/${courseId}/lessons/${lessonId}`, data),
+  deleteLesson: (courseId: number, lessonId: number) => api.delete(`/api/courses/${courseId}/lessons/${lessonId}`),
+  uploadMedia: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return api.post<{ url: string }>("/api/media/upload", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
 };
 
 // Analytics

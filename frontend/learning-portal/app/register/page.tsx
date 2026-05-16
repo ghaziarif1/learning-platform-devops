@@ -8,13 +8,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen } from "lucide-react";
 import { authAPI } from "@/lib/api";
 
+type RegisterForm = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: "student" | "instructor" | "admin";
+};
+
 export default function RegisterPage() {
-  const [form, setForm] = useState({ email: "", password: "", firstName: "", lastName: "" });
+  const [form, setForm] = useState<RegisterForm>({ email: "", password: "", firstName: "", lastName: "", role: "student" });
   const [error, setError]   = useState("");
   const [loading, setLoading] = useState(false);
 
-  const update = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }));
+  const update = <K extends keyof RegisterForm>(k: K) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm(f => ({ ...f, [k]: e.target.value } as RegisterForm));
 
   const submit = async () => {
     setError(""); setLoading(true);
@@ -57,9 +65,22 @@ export default function RegisterPage() {
             <Label>Email</Label>
             <Input type="email" placeholder="you@example.com" value={form.email} onChange={update("email")} />
           </div>
-          <div className="space-y-1.5">
-            <Label>Password</Label>
-            <Input type="password" placeholder="Min. 6 characters" value={form.password} onChange={update("password")} />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Password</Label>
+              <Input type="password" placeholder="Min. 6 characters" value={form.password} onChange={update("password")} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Account type</Label>
+              <select
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                value={form.role}
+                onChange={update("role")}
+              >
+                <option value="student">Student</option>
+                <option value="instructor">Instructor</option>
+              </select>
+            </div>
           </div>
           <Button className="w-full" onClick={submit} disabled={loading}>
             {loading ? "Creating account..." : "Create Account"}

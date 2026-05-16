@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Plus } from "lucide-react";
 import Navbar from "@/components/ui-custom/Navbar";
 import CourseCard from "@/components/ui-custom/CourseCard";
 import { coursesAPI, Course } from "@/lib/api";
@@ -13,6 +14,7 @@ export default function CoursesPage() {
   const [category, setCategory]   = useState("");
   const [level, setLevel]         = useState("");
   const [isFree, setIsFree]       = useState<boolean | undefined>();
+  const [user, setUser]           = useState<{ id: string; role: string } | null>(null);
   const [loading, setLoading]     = useState(true);
 
   const fetchCourses = async () => {
@@ -29,7 +31,18 @@ export default function CoursesPage() {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchCourses(); }, []);
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setUser(parsed);
+      } catch {
+        setUser(null);
+      }
+    }
+    fetchCourses();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -37,9 +50,20 @@ export default function CoursesPage() {
       <div className="max-w-7xl mx-auto px-4 py-10">
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Course Catalog</h1>
-          <p className="text-slate-600 mt-1">Discover our courses and start learning today</p>
+        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Catalogue des cours</h1>
+            <p className="text-slate-600 mt-1">Découvrez nos cours et commencez à apprendre dès aujourd'hui</p>
+          </div>
+          {user && (user.role === "instructor" || user.role === "admin") ? (
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Link href="/courses/create">
+                <Button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4" /> Créer un cours
+                </Button>
+              </Link>
+            </div>
+          ) : null}
         </div>
 
         {/* Filters */}
@@ -84,7 +108,17 @@ export default function CoursesPage() {
           <div className="text-center py-20 text-slate-400">No courses found.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map(course => <CourseCard key={course.id} course={course} />)}
+            {courses.map((course) => {
+              const isOwner = Boolean(user && (user.role === "admin" || user.role === "instructor") && course.instructor_id === user.id);
+              return (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  editHref={isOwner ? `/courses/${course.id}/edit` : undefined}
+                  isOwner={isOwner}
+                />
+              );
+            })}
           </div>
         )}
       </div>
