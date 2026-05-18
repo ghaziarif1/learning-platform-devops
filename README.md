@@ -47,7 +47,7 @@ Browser → Nginx (Port 80)
 
 ---
 
-## 🗄️ Bases de données
+## ðŸ—„ï¸ Bases de données
 
 | Base | Image | Port | Usage |
 |---|---|---|---|
@@ -59,7 +59,39 @@ Browser → Nginx (Port 80)
 
 ---
 
-## ✅ Prérequis
+## ðŸš³ Kubernetes / Stockage persistant
+
+Ce projet inclut aussi une préparation pour un cluster K3s local avec du stockage persistant Longhorn.
+
+- Cluster K3s 3 nœuds : `k3s-server`, `k3s-agent1`, `k3s-agent2`
+- Longhorn installé pour provisionner des volumes durables
+- StorageClass dédiée : `longhorn-single-replica`
+- PVC préparés pour :
+  - `k8s/pvc-postgres.yaml`
+  - `k8s/pvc-mongodb.yaml`
+  - `k8s/pvc-minio.yaml`
+  - `k8s/pvc-redis.yaml` (si persistance activée)
+
+### Vérifications utiles
+
+```bash
+kubectl get nodes
+kubectl get sc | grep longhorn
+kubectl get pvc -n default
+kubectl get pv -o wide
+kubectl get volumes.longhorn.io -n longhorn-system
+kubectl describe pod test-postgres-volume -n default
+```
+
+### État actuel
+
+- PVC `pvc-postgres` : `Bound`
+- Volume Longhorn associé : créé mais `detached`
+- Pod de test `test-postgres-volume` : bloqué en `ContainerCreating` à cause de `insufficient storage`
+
+---
+
+## ðŸ§ª Prérequis
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (avec WSL2)
 - [Git](https://git-scm.com/)
@@ -73,7 +105,7 @@ Browser → Nginx (Port 80)
 ### 1. Cloner le repo
 
 ```bash
-git clone https://github.com/TON_USERNAME/learning-platform-devops.git
+git clone https://github.com/ghaziarif1/learning-platform-devops.git
 cd learning-platform-devops
 ```
 
